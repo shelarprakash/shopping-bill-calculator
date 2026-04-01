@@ -32,47 +32,51 @@ describe('calculateBill', () => {
   });
 
   describe('offer: Buy a Cheese, get a second Cheese free', () => {
-    it('applies with 1 cheese — get a second free (no deduction)', () => {
+    it('does not apply with 1 cheese (need at least 2 for BOGOF)', () => {
       const bill = calculateBill([item('cheese', 1)]);
       const offerApplied = bill.appliedOffers.find(
         (o) => o.offerId === 'offer-cheese-bogof',
       );
-      expect(offerApplied).toBeDefined();
-      // Free item is a bonus, not a deduction
-      expect(offerApplied?.saving).toBe(0);
-      expect(offerApplied?.freeItems).toEqual({
-        productName: 'Cheese',
-        quantity: 1,
-        value: 0.90,
-      });
-      // You still pay for the 1 cheese in cart
+      expect(offerApplied).toBeUndefined();
       expect(bill.total).toBe(0.90);
     });
 
-    it('applies for 2 cheese — get 2 free', () => {
+    it('applies for 2 cheese — buy 2 pay for 1', () => {
       const bill = calculateBill([item('cheese', 2)]);
       const offerApplied = bill.appliedOffers.find(
         (o) => o.offerId === 'offer-cheese-bogof',
       );
       expect(offerApplied).toBeDefined();
-      expect(offerApplied?.saving).toBe(0);
+      expect(offerApplied?.saving).toBe(0.90);
       expect(offerApplied?.freeItems).toEqual({
         productName: 'Cheese',
-        quantity: 2,
-        value: 1.80,
+        quantity: 1,
+        value: 0.90,
       });
-      // Pay for 2 cheeses, get 2 free
-      expect(bill.total).toBe(1.80);
+      // Pay for 1 cheese: 2 × £0.90 - £0.90 = £0.90
+      expect(bill.total).toBe(0.90);
     });
 
-    it('applies for 3 cheese — get 3 free', () => {
+    it('applies for 3 cheese — 1 free, pay for 2', () => {
       const bill = calculateBill([item('cheese', 3)]);
       const offerApplied = bill.appliedOffers.find(
         (o) => o.offerId === 'offer-cheese-bogof',
       );
-      expect(offerApplied?.saving).toBe(0);
-      expect(offerApplied?.freeItems?.quantity).toBe(3);
-      expect(bill.total).toBe(2.70);
+      expect(offerApplied?.saving).toBe(0.90);
+      expect(offerApplied?.freeItems?.quantity).toBe(1);
+      // 3 × £0.90 - £0.90 = £1.80
+      expect(bill.total).toBe(1.80);
+    });
+
+    it('applies for 4 cheese — 2 free, pay for 2', () => {
+      const bill = calculateBill([item('cheese', 4)]);
+      const offerApplied = bill.appliedOffers.find(
+        (o) => o.offerId === 'offer-cheese-bogof',
+      );
+      expect(offerApplied?.saving).toBe(1.80);
+      expect(offerApplied?.freeItems?.quantity).toBe(2);
+      // 4 × £0.90 - £1.80 = £1.80
+      expect(bill.total).toBe(1.80);
     });
   });
 
@@ -156,17 +160,16 @@ describe('calculateBill', () => {
       const bill = calculateBill([
         item('soup', 1),
         item('bread', 1),
-        item('cheese', 1),
+        item('cheese', 2),
         item('butter', 1),
       ]);
       expect(bill.appliedOffers).toHaveLength(3);
-      // Cheese BOGOF has saving=0 (free items are bonus, not deduction)
-      // 0.55 (bread half price) + 0.40 (butter third off) = 0.95
-      expect(bill.totalSavings).toBe(0.95);
-      // Cheese offer is present with freeItems
+      // 0.90 (cheese BOGOF) + 0.55 (bread half price) + 0.40 (butter third off) = 1.85
+      expect(bill.totalSavings).toBe(1.85);
       const cheeseOffer = bill.appliedOffers.find(
         (o) => o.offerId === 'offer-cheese-bogof',
       );
+      expect(cheeseOffer?.saving).toBe(0.90);
       expect(cheeseOffer?.freeItems?.quantity).toBe(1);
     });
   });

@@ -72,17 +72,17 @@ const applyBuyOneGetOneFree = (
   if (!product) return null;
 
   const qty = getQuantity(items, offer.targetProductId);
-  if (qty < offer.requiredQuantity) return null;
+  if (qty < 2) return null;
 
-  // Free items are a bonus — no deduction from cart total
-  const freeQty = qty;
-  const freeValue = round2dp(product.price * freeQty);
+  // Buy one get one free: for every 2 items, 1 is free
+  const freeQty = Math.floor(qty / 2);
+  const saving = round2dp(product.price * freeQty);
 
   return {
     offerId: offer.id,
     description: offer.description,
-    saving: 0,
-    freeItems: { productName: product.name, quantity: freeQty, value: freeValue },
+    saving,
+    freeItems: { productName: product.name, quantity: freeQty, value: saving },
   };
 };
 

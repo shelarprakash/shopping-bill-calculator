@@ -32,10 +32,10 @@ describe('BillSummary', () => {
     expect(screen.getByTestId('subtotal')).toHaveTextContent('£1.00');
   });
 
-  it('shows checkout button before checkout', () => {
+  it('shows checkout button and total before checkout', () => {
     renderWithStore([{ productId: 'milk', quantity: 1 }]);
     expect(screen.getByTestId('checkout-btn')).toBeInTheDocument();
-    expect(screen.queryByTestId('total')).not.toBeInTheDocument();
+    expect(screen.getByTestId('total')).toHaveTextContent('£0.50');
   });
 
   it('opens dialog on checkout click and shows saved receipt after save', async () => {
@@ -68,12 +68,13 @@ describe('BillSummary', () => {
     expect(screen.queryByText('Your Order Summary')).not.toBeInTheDocument();
   });
 
-  it('does not show offers before checkout', () => {
+  it('shows offers before checkout', () => {
     renderWithStore([
       { productId: 'soup', quantity: 1 },
       { productId: 'bread', quantity: 1 },
     ]);
-    expect(screen.queryByTestId('offer-offer-soup-bread')).not.toBeInTheDocument();
+    expect(screen.getByTestId('offer-offer-soup-bread')).toBeInTheDocument();
+    expect(screen.getByTestId('total')).toHaveTextContent('£1.15');
   });
 
   it('clears cart when "Clear basket" button is clicked', async () => {

@@ -94,7 +94,7 @@ const BillSummary = () => {
                 <span data-testid="subtotal">{formatCurrency(bill.subtotal)}</span>
               </div>
 
-              {checkedOut && bill.appliedOffers.length > 0 && (
+              {bill.appliedOffers.length > 0 && (
                 <div className="bg-green-50 border border-green-100 rounded-lg p-3 space-y-2">
                   <div className="flex items-center gap-1.5 text-green-700">
                     <TagIcon className="w-4 h-4" />
@@ -130,24 +130,21 @@ const BillSummary = () => {
 
         {!isEmpty && (
           <div className="border-t border-gray-100 p-5 space-y-3 bg-gray-50">
-            {checkedOut ? (
-              <>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-gray-800 text-lg">Total</span>
-                  <span
-                    className="font-bold text-brand-700 text-2xl"
-                    data-testid="total"
-                  >
-                    {formatCurrency(bill.total)}
-                  </span>
-                </div>
-                {bill.totalSavings > 0 && (
-                  <p className="text-xs text-green-600 text-center font-medium">
-                    You saved {formatCurrency(bill.totalSavings)} with special offers!
-                  </p>
-                )}
-              </>
-            ) : (
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-gray-800 text-lg">Total</span>
+              <span
+                className="font-bold text-brand-700 text-2xl"
+                data-testid="total"
+              >
+                {formatCurrency(bill.total)}
+              </span>
+            </div>
+            {bill.totalSavings > 0 && (
+              <p className="text-xs text-green-600 text-center font-medium">
+                You saved {formatCurrency(bill.totalSavings)} with special offers!
+              </p>
+            )}
+            {!checkedOut && (
               <button
                 onClick={handleCheckoutClick}
                 className="w-full py-3 text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 rounded-lg transition-colors"
